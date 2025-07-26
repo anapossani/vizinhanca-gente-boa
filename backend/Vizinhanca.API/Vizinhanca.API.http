@@ -1,0 +1,6 @@
+@Vizinhanca.API_HostAddress = http://localhost:5208
+
+GET {{Vizinhanca.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
