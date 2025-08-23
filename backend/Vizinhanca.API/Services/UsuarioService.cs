@@ -6,9 +6,9 @@ namespace Vizinhanca.API.Services
 {
     public class UsuarioService
     {
-        private readonly VizinhançaContext _context;
+        private readonly VizinhancaContext _context;
 
-        public UsuarioService(VizinhançaContext context)
+        public UsuarioService(VizinhancaContext context)
         {
             _context = context;
         }

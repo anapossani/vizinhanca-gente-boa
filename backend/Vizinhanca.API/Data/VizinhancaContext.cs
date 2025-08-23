@@ -1,19 +1,29 @@
 using Microsoft.EntityFrameworkCore;
-using Vizinhanca.API.Models; 
+using Vizinhanca.API.Models;
 
 namespace Vizinhanca.API.Data
 {
-    public class VizinhançaContext : DbContext
+    public class VizinhancaContext : DbContext
     {
-        public VizinhançaContext(DbContextOptions<VizinhançaContext> options) : base(options)
+        public VizinhancaContext(DbContextOptions<VizinhancaContext> options) : base(options)
         {
         }
-        
+
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<CategoriaAjuda> CategoriasAjuda { get; set; }
         public DbSet<PedidoAjuda> PedidosAjuda { get; set; }
         public DbSet<Comentario> Comentarios { get; set; }
         public DbSet<Participacao> Participacoes { get; set; }
-       
-    }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Usuario>().ToTable("usuario");
+            modelBuilder.Entity<CategoriaAjuda>().ToTable("categoriaajuda");
+            modelBuilder.Entity<PedidoAjuda>().ToTable("pedidoajuda");
+            modelBuilder.Entity<Comentario>().ToTable("comentario");
+            modelBuilder.Entity<Participacao>().ToTable("participacao");
+        }
+    }    
 }

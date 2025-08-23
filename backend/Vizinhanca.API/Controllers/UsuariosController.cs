@@ -53,6 +53,18 @@ namespace Vizinhanca.API.Controllers
                 return NotFound();
             }
             return NoContent();
-        }        
+        }   
+
+         [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUsuario(int id)
+        {
+            var sucesso = await _usuarioService.DeleteUsuarioAsync(id);
+
+            if (!sucesso)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }      
     }
 }

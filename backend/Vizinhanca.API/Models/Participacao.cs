@@ -1,7 +1,5 @@
-// Dentro de Vizinhanca.API/Models/Participacao.cs
-
 namespace Vizinhanca.API.Models
-{
+{    
     public enum StatusParticipacao
     {
         interessado,
@@ -17,7 +15,7 @@ namespace Vizinhanca.API.Models
 
         public int PedidoId { get; set; }
         public int UsuarioId { get; set; }
-        
+
         public PedidoAjuda Pedido { get; set; } = null!;
         public Usuario Usuario { get; set; } = null!;
     }
