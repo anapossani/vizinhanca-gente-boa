@@ -5,8 +5,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers(); 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(); 
+builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<ComentarioService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
