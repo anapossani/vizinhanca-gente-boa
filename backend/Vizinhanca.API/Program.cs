@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Vizinhanca.API.Data;
+using Vizinhanca.API.Models;
 using Vizinhanca.API.Services;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<ComentarioService>();
+builder.Services.AddScoped<CategoriaAjudaService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

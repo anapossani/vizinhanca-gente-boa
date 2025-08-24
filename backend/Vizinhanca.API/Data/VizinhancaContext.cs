@@ -20,7 +20,7 @@ namespace Vizinhanca.API.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Usuario>().ToTable("usuario");
-            modelBuilder.Entity<CategoriaAjuda>().ToTable("categoriaajuda");
+            modelBuilder.Entity<CategoriaAjuda>().ToTable("categoria_ajuda");
             modelBuilder.Entity<PedidoAjuda>().ToTable("pedidoajuda");
             modelBuilder.Entity<Comentario>().ToTable("comentario");
             modelBuilder.Entity<Participacao>().ToTable("participacao");
