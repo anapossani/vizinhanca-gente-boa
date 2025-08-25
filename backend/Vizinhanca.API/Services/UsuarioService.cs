@@ -23,8 +23,17 @@ namespace Vizinhanca.API.Services
             return await _context.Usuarios.FindAsync(id);
         }
 
-        public async Task<Usuario> CreateUsuarioAsync(Usuario novoUsuario)
+        public async Task<Usuario> CreateUsuarioAsync(UsuarioCreateDto usuarioDto )
         {
+            var novoUsuario = new Usuario
+            {
+                Nome = usuarioDto.Nome,
+                Telefone = usuarioDto.Telefone,
+                Bairro = usuarioDto.Bairro,
+                Email = usuarioDto.Email,
+                Senha = usuarioDto.Senha,
+                DataCriacao = DateTime.UtcNow
+            };
             _context.Usuarios.Add(novoUsuario);
             await _context.SaveChangesAsync();
             return novoUsuario;
