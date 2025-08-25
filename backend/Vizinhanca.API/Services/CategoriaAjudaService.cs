@@ -33,8 +33,6 @@ namespace Vizinhanca.API.Services
             _context.CategoriasAjuda.Add(novaCategoriaAjuda);
             await _context.SaveChangesAsync();
             return novaCategoriaAjuda;
-        }
-        
-
+        }        
     }
 }       

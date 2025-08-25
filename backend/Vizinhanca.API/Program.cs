@@ -10,6 +10,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<ComentarioService>();
 builder.Services.AddScoped<CategoriaAjudaService>();
+builder.Services.AddScoped<ParticipacaoService>(); 
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

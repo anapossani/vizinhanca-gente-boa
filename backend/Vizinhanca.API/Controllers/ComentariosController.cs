@@ -68,9 +68,5 @@ namespace Vizinhanca.API.Controllers
             }
             return NoContent();
         }      
-
-
-
     }    
-
 }
