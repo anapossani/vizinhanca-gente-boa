@@ -6,7 +6,7 @@ namespace Vizinhanca.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ComentariosController : ControllerBase
+    public class ComentariosController : BaseApiController
     {
         private readonly ComentarioService _comentarioService;
 
@@ -29,7 +29,7 @@ namespace Vizinhanca.API.Controllers
         {
             var comentario = await _comentarioService.GetComentarioByIdAsync(id);
 
-            if (comentario == null)
+            if (comentario is null)
             {
                 return NotFound();
             }
@@ -40,7 +40,7 @@ namespace Vizinhanca.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Comentario>> PostComentario(ComentarioCreateDto comentarioDto)
         {
-                var novoComentario = await _comentarioService.CreateComentarioAsync(comentarioDto);
+                var novoComentario = await _comentarioService.CreateComentarioAsync(comentarioDto, UsuarioLogadoId);
 
                 return CreatedAtAction(nameof(GetComentario), new { id = novoComentario.Id }, novoComentario);
         }
@@ -48,7 +48,7 @@ namespace Vizinhanca.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutComentario(int id, ComentarioUpdateDto comentarioDto)
         {
-            var sucesso = await _comentarioService.UpdateComentarioAsync(id, comentarioDto);
+            var sucesso = await _comentarioService.UpdateComentarioAsync(id, comentarioDto, UsuarioLogadoId);           
 
             if (!sucesso)
             {
@@ -60,7 +60,7 @@ namespace Vizinhanca.API.Controllers
          [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComentario(int id)
         {
-            var sucesso = await _comentarioService.DeleteComentarioAsync(id);
+            var sucesso = await _comentarioService.DeleteComentarioAsync(id, UsuarioLogadoId);
 
             if (!sucesso)
             {

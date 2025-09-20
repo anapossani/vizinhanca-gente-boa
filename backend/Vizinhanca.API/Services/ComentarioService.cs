@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Vizinhanca.API.Data;
 using Vizinhanca.API.Models;
+using Vizinhanca.API.Exceptions;
+using Microsoft.OpenApi.Any;
 
 namespace Vizinhanca.API.Services
 {
@@ -35,13 +37,13 @@ namespace Vizinhanca.API.Services
             return await _context.Comentarios.FindAsync(id);
         }
   
-        public async Task<Comentario> CreateComentarioAsync(ComentarioCreateDto comentarioDto)
+        public async Task<Comentario> CreateComentarioAsync(ComentarioCreateDto comentarioDto, int usuarioLogadoId)
         {
             var novoComentario = new Comentario
             {
                 Mensagem = comentarioDto.Mensagem,
                 PedidoId = comentarioDto.PedidoId,
-                UsuarioId = 1 
+                UsuarioId = usuarioLogadoId
             };
             
             _context.Comentarios.Add(novoComentario);
@@ -50,12 +52,16 @@ namespace Vizinhanca.API.Services
         }
      
 
-        public async Task<bool> UpdateComentarioAsync(int id, ComentarioUpdateDto comentarioDto)
+        public async Task<bool> UpdateComentarioAsync(int id, ComentarioUpdateDto comentarioDto, int usuarioLogadoId)
         {
             var comentarioExistente = await _context.Comentarios.FindAsync(id);
-            if (comentarioExistente == null)
+            if (comentarioExistente is null)
             {
                 return false;
+            }
+            if (usuarioLogadoId != comentarioExistente.UsuarioId)
+            {
+                throw new BusinessRuleException("Somente o criador do comentário pode realizar alterações.");                
             }
 
             comentarioExistente.Mensagem = !string.IsNullOrWhiteSpace(comentarioDto.Mensagem) ? comentarioDto.Mensagem : comentarioExistente.Mensagem;            
@@ -64,13 +70,17 @@ namespace Vizinhanca.API.Services
             return true;
         }
 
-        public async Task<bool> DeleteComentarioAsync(int id)
+        public async Task<bool> DeleteComentarioAsync(int id, int usuarioLogadoId)
         {
             var comentarioParaDeletar = await _context.Comentarios.FindAsync(id);
 
-            if (comentarioParaDeletar == null)
+            if (comentarioParaDeletar is null)
             {
                 return false;
+            }
+            if (usuarioLogadoId != comentarioParaDeletar.UsuarioId)
+            {
+                throw new BusinessRuleException("Somente o criador do comentário pode realizar alterações.");                                
             }
 
             _context.Comentarios.Remove(comentarioParaDeletar);
@@ -79,7 +89,5 @@ namespace Vizinhanca.API.Services
 
             return true;
         }
-
-
     }
 }

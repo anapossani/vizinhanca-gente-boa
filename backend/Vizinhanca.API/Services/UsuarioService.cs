@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Vizinhanca.API.Data;
 using Vizinhanca.API.Models;
+using Vizinhanca.API.Exceptions;
 
 namespace Vizinhanca.API.Services
 {
@@ -40,12 +41,16 @@ namespace Vizinhanca.API.Services
         }
         
 
-        public async Task<bool> UpdateUsuarioAsync(int id, UsuarioUpdateDto usuarioDto)
+        public async Task<bool> UpdateUsuarioAsync(int id, UsuarioUpdateDto usuarioDto, int usuarioLogadoId)
         {
             var usuarioExistente = await _context.Usuarios.FindAsync(id);
-            if (usuarioExistente == null)
+            if (usuarioExistente is null)
             {
                 return false;
+            }
+            if (id != usuarioLogadoId)
+            {
+                throw new BusinessRuleException("Ação não permitida: você está tentando alterar os dados de outro usuário. Por favor, faça login com o usuário correto para continuar.");
             }
 
             usuarioExistente.Nome = !string.IsNullOrWhiteSpace(usuarioDto.Nome) ? usuarioDto.Nome : usuarioExistente.Nome;
@@ -56,13 +61,18 @@ namespace Vizinhanca.API.Services
             return true;
         }
 
-        public async Task<bool> DeleteUsuarioAsync(int id)
+        public async Task<bool> DeleteUsuarioAsync(int id, int usuarioLogadoId)
         {
             var usuarioParaDeletar = await _context.Usuarios.FindAsync(id);
 
-            if (usuarioParaDeletar == null)
+            if (usuarioParaDeletar is null)
             {
                 return false;
+            }
+            if (usuarioLogadoId != id)
+            {
+                throw new BusinessRuleException("Ação não permitida: você está remover outro usuário. Por favor, faça login com o usuário correto para continuar.");
+                
             }
 
             _context.Usuarios.Remove(usuarioParaDeletar);

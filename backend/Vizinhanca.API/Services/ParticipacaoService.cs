@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Vizinhanca.API.Data;
 using Vizinhanca.API.Models;
+using Vizinhanca.API.Exceptions;
 
 namespace Vizinhanca.API.Services
 {
     public class ParticipacaoService
     {
+
+        
         private readonly VizinhancaContext _context;
 
         public ParticipacaoService(VizinhancaContext context)
@@ -46,12 +49,16 @@ namespace Vizinhanca.API.Services
             return novaParticipacao;
         }
 
-        public async Task<bool> UpdateParticipacaoAsync(int id, ParticipacaoUpdateDto participacaoDto)
+        public async Task<bool> UpdateParticipacaoAsync(int id, ParticipacaoUpdateDto participacaoDto, int usuarioLogadoId)
         {
             var participacaoExistente = await _context.Participacoes.FindAsync(id);
-            if (participacaoExistente == null)
+            if (participacaoExistente is null)
             {
                 return false;
+            }
+            if (usuarioLogadoId != participacaoExistente.UsuarioId)
+            {
+                throw new BusinessRuleException("Somente o criador pode realizar alterações.");                                
             }
 
             participacaoExistente.Status = participacaoDto.Status;

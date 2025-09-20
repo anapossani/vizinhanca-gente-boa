@@ -6,7 +6,7 @@ namespace Vizinhanca.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CategoriasAjudaController : ControllerBase
+    public class CategoriasAjudaController : BaseApiController
     {
         private readonly CategoriaAjudaService _categoriaAjudaService;
 
@@ -27,7 +27,7 @@ namespace Vizinhanca.API.Controllers
         {
             var categoriaAjuda = await _categoriaAjudaService.GetCategoriaAjudaByIdAsync(id);
 
-            if (categoriaAjuda == null)
+            if (categoriaAjuda is null)
             {
                 return NotFound();
             }

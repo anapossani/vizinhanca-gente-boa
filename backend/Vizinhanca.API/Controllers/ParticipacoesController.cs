@@ -6,7 +6,7 @@ namespace Vizinhanca.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ParticipacoesController : ControllerBase
+    public class ParticipacoesController : BaseApiController
     {
         private readonly ParticipacaoService _participacaoService;
 
@@ -28,7 +28,7 @@ namespace Vizinhanca.API.Controllers
         {
             var participacao = await _participacaoService.GetParticipacaoByIdAsync(id);
 
-            if (participacao == null)
+            if (participacao is null)
             {
                 return NotFound();
             }
@@ -37,10 +37,9 @@ namespace Vizinhanca.API.Controllers
         }
         
         [HttpPost]
-        public async Task<ActionResult<Participacao>> PostComentario(ParticipacaoCreateDto participacaoDto)
+        public async Task<ActionResult<Participacao>> PostParticipacao(ParticipacaoCreateDto participacaoDto)
         {
-            var usuarioLogadoId = 1;
-            var novaParticipacao = await _participacaoService.CreateParticipacaoAsync(participacaoDto, usuarioLogadoId);
+            var novaParticipacao = await _participacaoService.CreateParticipacaoAsync(participacaoDto, UsuarioLogadoId);
 
                 return CreatedAtAction(nameof(GetParticipacao), new { id = novaParticipacao.Id }, novaParticipacao);
         }
@@ -48,7 +47,7 @@ namespace Vizinhanca.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutParticipacao(int id, ParticipacaoUpdateDto participacaoDto)
         {
-            var sucesso = await _participacaoService.UpdateParticipacaoAsync(id, participacaoDto);
+            var sucesso = await _participacaoService.UpdateParticipacaoAsync(id, participacaoDto, UsuarioLogadoId);
 
             if (!sucesso)
             {

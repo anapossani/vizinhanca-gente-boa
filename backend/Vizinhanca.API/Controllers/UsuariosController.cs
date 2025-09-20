@@ -6,7 +6,7 @@ namespace Vizinhanca.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsuariosController : ControllerBase
+    public class UsuariosController : BaseApiController
     {
         private readonly UsuarioService _usuarioService;
 
@@ -44,9 +44,9 @@ namespace Vizinhanca.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUsuario(int id, UsuarioUpdateDto usuarioDto)
+        public async Task<IActionResult> PutUsuario(int id, UsuarioUpdateDto usuarioDto, int usuarioLogadoId)
         {
-            var sucesso = await _usuarioService.UpdateUsuarioAsync(id, usuarioDto);
+            var sucesso = await _usuarioService.UpdateUsuarioAsync(id, usuarioDto, usuarioLogadoId);
 
             if (!sucesso)
             {
@@ -56,9 +56,9 @@ namespace Vizinhanca.API.Controllers
         }   
 
          [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUsuario(int id)
+        public async Task<IActionResult> DeleteUsuario(int id, int usuarioLogadoId)
         {
-            var sucesso = await _usuarioService.DeleteUsuarioAsync(id);
+            var sucesso = await _usuarioService.DeleteUsuarioAsync(id,usuarioLogadoId);
 
             if (!sucesso)
             {
