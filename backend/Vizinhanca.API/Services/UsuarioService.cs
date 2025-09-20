@@ -24,7 +24,7 @@ namespace Vizinhanca.API.Services
             return await _context.Usuarios.FindAsync(id);
         }
 
-        public async Task<Usuario> CreateUsuarioAsync(UsuarioCreateDto usuarioDto )
+        public async Task<Usuario> CreateUsuarioAsync(UsuarioCreateDto usuarioDto)
         {
             var novoUsuario = new Usuario
             {
@@ -32,14 +32,14 @@ namespace Vizinhanca.API.Services
                 Telefone = usuarioDto.Telefone,
                 Bairro = usuarioDto.Bairro,
                 Email = usuarioDto.Email,
-                Senha = usuarioDto.Senha,
+                Senha = BCrypt.Net.BCrypt.HashPassword(usuarioDto.Senha),
                 DataCriacao = DateTime.UtcNow
             };
             _context.Usuarios.Add(novoUsuario);
             await _context.SaveChangesAsync();
             return novoUsuario;
         }
-        
+
 
         public async Task<bool> UpdateUsuarioAsync(int id, UsuarioUpdateDto usuarioDto, int usuarioLogadoId)
         {
@@ -72,7 +72,7 @@ namespace Vizinhanca.API.Services
             if (usuarioLogadoId != id)
             {
                 throw new BusinessRuleException("Ação não permitida: você está remover outro usuário. Por favor, faça login com o usuário correto para continuar.");
-                
+
             }
 
             _context.Usuarios.Remove(usuarioParaDeletar);
@@ -82,6 +82,9 @@ namespace Vizinhanca.API.Services
             return true;
         }
 
-
-    }
+        public async Task<Usuario?> GetUsuarioByEmailAsync(string email)
+        {
+            return await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
+        } 
+    }      
 }

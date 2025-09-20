@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Vizinhanca.API.Models;
 using Vizinhanca.API.Services;
@@ -6,6 +7,7 @@ namespace Vizinhanca.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ComentariosController : BaseApiController
     {
         private readonly ComentarioService _comentarioService;
@@ -36,28 +38,28 @@ namespace Vizinhanca.API.Controllers
 
             return Ok(comentario);
         }
-        
+
         [HttpPost]
         public async Task<ActionResult<Comentario>> PostComentario(ComentarioCreateDto comentarioDto)
         {
-                var novoComentario = await _comentarioService.CreateComentarioAsync(comentarioDto, UsuarioLogadoId);
+            var novoComentario = await _comentarioService.CreateComentarioAsync(comentarioDto, UsuarioLogadoId);
 
-                return CreatedAtAction(nameof(GetComentario), new { id = novoComentario.Id }, novoComentario);
+            return CreatedAtAction(nameof(GetComentario), new { id = novoComentario.Id }, novoComentario);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutComentario(int id, ComentarioUpdateDto comentarioDto)
         {
-            var sucesso = await _comentarioService.UpdateComentarioAsync(id, comentarioDto, UsuarioLogadoId);           
+            var sucesso = await _comentarioService.UpdateComentarioAsync(id, comentarioDto, UsuarioLogadoId);
 
             if (!sucesso)
             {
                 return NotFound();
             }
             return NoContent();
-        }   
+        }
 
-         [HttpDelete("{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComentario(int id)
         {
             var sucesso = await _comentarioService.DeleteComentarioAsync(id, UsuarioLogadoId);
@@ -67,6 +69,6 @@ namespace Vizinhanca.API.Controllers
                 return NotFound();
             }
             return NoContent();
-        }      
+        }
     }    
 }
