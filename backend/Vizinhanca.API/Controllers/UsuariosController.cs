@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Vizinhanca.API.Models;
 using Vizinhanca.API.Services; 
-
+using Microsoft.AspNetCore.Authorization;
 namespace Vizinhanca.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] 
+    
     public class UsuariosController : BaseApiController
     {
         private readonly UsuarioService _usuarioService;
@@ -48,23 +50,24 @@ namespace Vizinhanca.API.Controllers
         {
             var sucesso = await _usuarioService.UpdateUsuarioAsync(id, usuarioDto, usuarioLogadoId);
 
-            if (!sucesso)
+            if (!sucesso) // lembrar de repicar o repique
             {
                 return NotFound();
             }
             return NoContent();
-        }   
+        }
 
-         [HttpDelete("{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUsuario(int id, int usuarioLogadoId)
         {
-            var sucesso = await _usuarioService.DeleteUsuarioAsync(id,usuarioLogadoId);
+            var sucesso = await _usuarioService.DeleteUsuarioAsync(id, usuarioLogadoId);
 
-            if (!sucesso)
+            if (sucesso)
             {
-                return NotFound();
+                return NoContent();    
             }
-            return NoContent();
-        }      
+            return NotFound();
+            
+        }
     }
 }

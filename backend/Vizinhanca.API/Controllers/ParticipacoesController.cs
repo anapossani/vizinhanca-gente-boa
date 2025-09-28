@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Vizinhanca.API.Models;
 using Vizinhanca.API.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Vizinhanca.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] 
     public class ParticipacoesController : BaseApiController
     {
         private readonly ParticipacaoService _participacaoService;
@@ -35,25 +37,25 @@ namespace Vizinhanca.API.Controllers
 
             return Ok(participacao);
         }
-        
+
         [HttpPost]
         public async Task<ActionResult<Participacao>> PostParticipacao(ParticipacaoCreateDto participacaoDto)
         {
-            var novaParticipacao = await _participacaoService.CreateParticipacaoAsync(participacaoDto, UsuarioLogadoId);
+            var novaParticipacao = await _participacaoService.CreateParticipacaoAsync(participacaoDto);
 
-                return CreatedAtAction(nameof(GetParticipacao), new { id = novaParticipacao.Id }, novaParticipacao);
+            return CreatedAtAction(nameof(GetParticipacao), new { id = novaParticipacao.Id }, novaParticipacao);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutParticipacao(int id, ParticipacaoUpdateDto participacaoDto)
         {
-            var sucesso = await _participacaoService.UpdateParticipacaoAsync(id, participacaoDto, UsuarioLogadoId);
+            var sucesso = await _participacaoService.UpdateParticipacaoAsync(id, participacaoDto);
 
             if (!sucesso)
             {
                 return NotFound();
             }
             return NoContent();
-        }     
+        }
     }    
 }

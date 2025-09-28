@@ -2,17 +2,18 @@ using Microsoft.EntityFrameworkCore;
 using Vizinhanca.API.Data;
 using Vizinhanca.API.Models;
 using Vizinhanca.API.Exceptions;
-using Microsoft.OpenApi.Any;
 
 namespace Vizinhanca.API.Services
 {
     public class ComentarioService
     {
         private readonly VizinhancaContext _context;
+        private readonly IdentityService _identityService;
 
-        public ComentarioService(VizinhancaContext context)
+        public ComentarioService(VizinhancaContext context, IdentityService identityService)
         {
             _context = context;
+            _identityService = identityService;
         }
 
         public async Task<IEnumerable<Comentario>> GetComentariosAsync(int? pedidoId, int? usuarioId)
@@ -37,8 +38,9 @@ namespace Vizinhanca.API.Services
             return await _context.Comentarios.FindAsync(id);
         }
   
-        public async Task<Comentario> CreateComentarioAsync(ComentarioCreateDto comentarioDto, int usuarioLogadoId)
+        public async Task<Comentario> CreateComentarioAsync(ComentarioCreateDto comentarioDto)
         {
+            var usuarioLogadoId = _identityService.GetUserId();
             var novoComentario = new Comentario
             {
                 Mensagem = comentarioDto.Mensagem,
@@ -52,8 +54,9 @@ namespace Vizinhanca.API.Services
         }
      
 
-        public async Task<bool> UpdateComentarioAsync(int id, ComentarioUpdateDto comentarioDto, int usuarioLogadoId)
+        public async Task<bool> UpdateComentarioAsync(int id, ComentarioUpdateDto comentarioDto)
         {
+            var usuarioLogadoId = _identityService.GetUserId();
             var comentarioExistente = await _context.Comentarios.FindAsync(id);
             if (comentarioExistente is null)
             {
@@ -70,8 +73,9 @@ namespace Vizinhanca.API.Services
             return true;
         }
 
-        public async Task<bool> DeleteComentarioAsync(int id, int usuarioLogadoId)
+        public async Task<bool> DeleteComentarioAsync(int id)
         {
+            var usuarioLogadoId = _identityService.GetUserId();
             var comentarioParaDeletar = await _context.Comentarios.FindAsync(id);
 
             if (comentarioParaDeletar is null)

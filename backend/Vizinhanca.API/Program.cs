@@ -1,22 +1,24 @@
 using Microsoft.EntityFrameworkCore;
 using Vizinhanca.API.Data;
-using Vizinhanca.API.Models;
 using Vizinhanca.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer; 
-using Microsoft.IdentityModel.Tokens;               
-using System.Text;                                  
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers(); 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IdentityService>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<ComentarioService>();
 builder.Services.AddScoped<CategoriaAjudaService>();
 builder.Services.AddScoped<ParticipacaoService>();
 builder.Services.AddScoped<PedidoAjudaService>();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<IdentityService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

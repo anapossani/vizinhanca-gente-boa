@@ -42,7 +42,7 @@ namespace Vizinhanca.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Comentario>> PostComentario(ComentarioCreateDto comentarioDto)
         {
-            var novoComentario = await _comentarioService.CreateComentarioAsync(comentarioDto, UsuarioLogadoId);
+            var novoComentario = await _comentarioService.CreateComentarioAsync(comentarioDto);
 
             return CreatedAtAction(nameof(GetComentario), new { id = novoComentario.Id }, novoComentario);
         }
@@ -50,7 +50,7 @@ namespace Vizinhanca.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutComentario(int id, ComentarioUpdateDto comentarioDto)
         {
-            var sucesso = await _comentarioService.UpdateComentarioAsync(id, comentarioDto, UsuarioLogadoId);
+            var sucesso = await _comentarioService.UpdateComentarioAsync(id, comentarioDto);
 
             if (!sucesso)
             {
@@ -62,7 +62,7 @@ namespace Vizinhanca.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComentario(int id)
         {
-            var sucesso = await _comentarioService.DeleteComentarioAsync(id, UsuarioLogadoId);
+            var sucesso = await _comentarioService.DeleteComentarioAsync(id);
 
             if (!sucesso)
             {

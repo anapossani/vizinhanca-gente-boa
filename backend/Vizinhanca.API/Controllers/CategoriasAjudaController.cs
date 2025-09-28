@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Vizinhanca.API.Models;
 using Vizinhanca.API.Services; 
+using Microsoft.AspNetCore.Authorization;
 
 namespace Vizinhanca.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]        
     public class CategoriasAjudaController : BaseApiController
     {
         private readonly CategoriaAjudaService _categoriaAjudaService;
@@ -38,9 +40,9 @@ namespace Vizinhanca.API.Controllers
         [HttpPost]
         public async Task<ActionResult<CategoriaAjuda>> PostCategoriaAjuda(CategoriaAjudaCreateDto categoriaAjudaDto)
         {
-                var novaCategoriaAjuda = await _categoriaAjudaService.CreateCategoriaAjudaAsync(categoriaAjudaDto);
+            var novaCategoriaAjuda = await _categoriaAjudaService.CreateCategoriaAjudaAsync(categoriaAjudaDto);
 
-                return CreatedAtAction(nameof(GetCategoriaAjuda), new { id = novaCategoriaAjuda.Id }, novaCategoriaAjuda);
+            return CreatedAtAction(nameof(GetCategoriaAjuda), new { id = novaCategoriaAjuda.Id }, novaCategoriaAjuda);
         }
 
     }

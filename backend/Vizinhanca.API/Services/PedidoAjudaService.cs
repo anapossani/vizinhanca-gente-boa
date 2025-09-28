@@ -1,19 +1,19 @@
-using System.Xml.Schema;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Vizinhanca.API.Data;
-using Vizinhanca.API.Exceptions;
 using Vizinhanca.API.Models;
+using Vizinhanca.API.Exceptions;
 
 namespace Vizinhanca.API.Services
 {
     public class PedidoAjudaService
     {
         private readonly VizinhancaContext _context;
+        private readonly IdentityService _identityService;
 
-        public PedidoAjudaService(VizinhancaContext context)
+        public PedidoAjudaService(VizinhancaContext context, IdentityService identityService)
         {
             _context = context;
+            _identityService = identityService;
         }
         public async Task<IEnumerable<PedidoAjuda>> GetPedidosAjudaAsync(int? usuarioId, StatusPedido? status, DateTime? dataInicial, DateTime? dataFinal)
 
@@ -46,8 +46,9 @@ namespace Vizinhanca.API.Services
             return await _context.PedidosAjuda.FindAsync(id);
         }
 
-        public async Task<PedidoAjuda> CreatePedidoAjudaAsync(PedidoAjudaCreateDto pedidoAjudaDto, int usuarioLogadoId)
+        public async Task<PedidoAjuda> CreatePedidoAjudaAsync(PedidoAjudaCreateDto pedidoAjudaDto)
         {
+            var usuarioLogadoId = _identityService.GetUserId();
             var novoPedidoAjuda = new PedidoAjuda
             {
                 Titulo = pedidoAjudaDto.Titulo,
@@ -62,9 +63,10 @@ namespace Vizinhanca.API.Services
             return novoPedidoAjuda;
         }
 
-        public async Task<bool> UpdatePedidoAjudaAsync(int id, PedidoAjudaUpdateDto pedidoAjudaDto, int usuarioLogadoId)
+        public async Task<bool> UpdatePedidoAjudaAsync(int id, PedidoAjudaUpdateDto pedidoAjudaDto)
         {
             var pedidoExistente = await _context.PedidosAjuda.FindAsync(id);
+            var usuarioLogadoId = _identityService.GetUserId();
 
             if (pedidoExistente is null)
             {
@@ -92,9 +94,10 @@ namespace Vizinhanca.API.Services
             return true;
         }
 
-        public async Task<bool> ConcluirPedidoAsync(int id, int usuarioLogadoId)
+        public async Task<bool> ConcluirPedidoAsync(int id)
         {
             var pedido = await _context.PedidosAjuda.FindAsync(id);
+            var usuarioLogadoId = _identityService.GetUserId();
             
             if (pedido is null || pedido.Status != StatusPedido.em_andamento)
             {

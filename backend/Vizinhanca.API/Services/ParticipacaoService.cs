@@ -7,13 +7,13 @@ namespace Vizinhanca.API.Services
 {
     public class ParticipacaoService
     {
-
-        
         private readonly VizinhancaContext _context;
+        private readonly IdentityService _identityService;
 
-        public ParticipacaoService(VizinhancaContext context)
+        public ParticipacaoService(VizinhancaContext context, IdentityService identityService)
         {
             _context = context;
+            _identityService = identityService;
         }
         public async Task<IEnumerable<Participacao>> GetParticipacoesAsync(StatusParticipacao? status)
         {
@@ -33,8 +33,9 @@ namespace Vizinhanca.API.Services
             return await _context.Participacoes.FindAsync(id);
         }
 
-        public async Task<Participacao> CreateParticipacaoAsync(ParticipacaoCreateDto participacaoDto, int usuarioLogadoId)
+        public async Task<Participacao> CreateParticipacaoAsync(ParticipacaoCreateDto participacaoDto)
         {
+            var usuarioLogadoId = _identityService.GetUserId();
             var novaParticipacao = new Participacao
             {
                 PedidoId = participacaoDto.PedidoId,
@@ -49,8 +50,9 @@ namespace Vizinhanca.API.Services
             return novaParticipacao;
         }
 
-        public async Task<bool> UpdateParticipacaoAsync(int id, ParticipacaoUpdateDto participacaoDto, int usuarioLogadoId)
+        public async Task<bool> UpdateParticipacaoAsync(int id, ParticipacaoUpdateDto participacaoDto)
         {
+            var usuarioLogadoId = _identityService.GetUserId();
             var participacaoExistente = await _context.Participacoes.FindAsync(id);
             if (participacaoExistente is null)
             {

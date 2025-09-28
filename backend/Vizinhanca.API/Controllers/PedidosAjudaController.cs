@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Vizinhanca.API.Exceptions;
 using Vizinhanca.API.Models;
 using Vizinhanca.API.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Vizinhanca.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] 
     public class PedidosAjudaController : BaseApiController
     {
         private readonly PedidoAjudaService _pedidoAjudaService;
@@ -46,7 +48,7 @@ namespace Vizinhanca.API.Controllers
         {
             try
             {
-                var sucesso = await _pedidoAjudaService.UpdatePedidoAjudaAsync(id, dto, UsuarioLogadoId);
+                var sucesso = await _pedidoAjudaService.UpdatePedidoAjudaAsync(id, dto);
                 if (!sucesso)
                 {
                     return NotFound();
@@ -58,19 +60,19 @@ namespace Vizinhanca.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        
-        [HttpPost("{id}/concluir")] 
+
+        [HttpPost("{id}/concluir")]
         public async Task<IActionResult> ConcluirPedido(int id)
         {
-            var sucesso = await _pedidoAjudaService.ConcluirPedidoAsync(id, UsuarioLogadoId);
+            var sucesso = await _pedidoAjudaService.ConcluirPedidoAsync(id);
 
             if (!sucesso)
             {
-                return NotFound(); 
+                return NotFound();
             }
 
-            return NoContent(); 
-        }        
+            return NoContent();
+        }
 
     }
 }       

@@ -13,7 +13,14 @@ namespace Vizinhanca.API.Controllers
         {
             get
             {
-                return 1;
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                {
+                    throw new InvalidOperationException("Não foi possível identificar o usuário logado a partir do token.");
+                }
+
+                return int.Parse(userIdClaim);                
+                
             }
         }
     }
