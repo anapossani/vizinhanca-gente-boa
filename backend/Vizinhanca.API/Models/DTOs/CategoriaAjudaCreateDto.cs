@@ -1,3 +1,4 @@
+
 public class CategoriaAjudaCreateDto
 {
     public string Nome { get; set; } = null!;

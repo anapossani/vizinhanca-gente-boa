@@ -38,6 +38,7 @@ namespace Vizinhanca.API.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<Usuario>> PostUsuario(UsuarioCreateDto usuarioDto)
         {
             var novoUsuario = await _usuarioService.CreateUsuarioAsync(usuarioDto);

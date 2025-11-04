@@ -33,6 +33,8 @@ namespace Vizinhanca.API.Services
                 Bairro = usuarioDto.Bairro,
                 Email = usuarioDto.Email,
                 Senha = BCrypt.Net.BCrypt.HashPassword(usuarioDto.Senha),
+                Cidade = usuarioDto.Cidade,
+                Estado = usuarioDto.Estado,
                 DataCriacao = DateTime.UtcNow
             };
             _context.Usuarios.Add(novoUsuario);

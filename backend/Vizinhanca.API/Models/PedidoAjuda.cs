@@ -1,4 +1,4 @@
-
+using System.ComponentModel.DataAnnotations;
 namespace Vizinhanca.API.Models
 {
     // Vamos precisar do nosso ENUM aqui também
@@ -20,7 +20,12 @@ namespace Vizinhanca.API.Models
         public StatusPedido Status { get; set; }
         public DateTime DataCriacao { get; set; }
         public DateTime? DataConclusao { get; set; }
-
+        [StringLength(100)]
+        public string Cidade { get; set; } = null!;
+        [StringLength(2)]
+        public string Estado { get; set; } = null!;
+        [StringLength(100)]
+        public string Bairro { get; set; } = null!;
         public int UsuarioId { get; set; }
         public int CategoriaId { get; set; }
 
