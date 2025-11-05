@@ -75,7 +75,7 @@ public class WebApiApplication
                         {
                             if (corsOrigins != null)
                             {
-                                policy.WithOrigins(corsOrigins.Split(',')) // Separa por vírgula para múltiplas origens
+                                policy.WithOrigins(corsOrigins.Split(',')) 
                                         .AllowAnyHeader()
                                         .AllowAnyMethod();
                             }
@@ -90,8 +90,9 @@ public class WebApiApplication
         app.UseSwaggerUI();
     }
 
-    app.UseCors(MyAllowSpecificOrigins);
-    app.UseAuthentication();
+    app.UseHttpsRedirection();
+    app.UseRouting();
+    app.UseCors(MyAllowSpecificOrigins); 
     app.UseAuthorization();
     app.MapControllers();
 
