@@ -14,7 +14,8 @@ public class WebApiApplication
 
     var builder = WebApplication.CreateBuilder(args);
     var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-
+    
+    builder.Configuration.AddJsonFile("/etc/secrets/secrets.json", optional: true, reloadOnChange: true)
     builder.Services.AddControllers(); 
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
