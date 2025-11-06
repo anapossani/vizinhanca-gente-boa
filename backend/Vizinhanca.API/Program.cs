@@ -4,6 +4,7 @@ using Vizinhanca.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer; 
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Threading.RateLimiting;
 
 public partial class Program { }
 
@@ -48,6 +49,19 @@ public class WebApiApplication
 
         );
 
+        //builder.Services.AddRateLimiter(options =>
+       // {
+       //     options.AddFixedWindowLimiter(policyName: "fixed", opt =>
+       //     {
+       //         opt.PermitLimit = 5; 
+       //         opt.Window = TimeSpan.FromSeconds(60); 
+       //         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst; 
+       //         opt.QueueLimit = 2; 
+       //     });
+//
+ //           options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+ //       });        
+
     builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -88,12 +102,11 @@ public class WebApiApplication
     app.UseSwagger();
     app.UseSwaggerUI();
     app.UseHttpsRedirection();
+    //app.UseRateLimiter();
     app.UseRouting();
     app.UseCors(MyAllowSpecificOrigins); 
     app.UseAuthorization();
     app.MapControllers();
-
-
     app.Run();
     }
 }     

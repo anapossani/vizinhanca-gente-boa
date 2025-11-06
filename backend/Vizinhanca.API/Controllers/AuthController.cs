@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Vizinhanca.API.Models; 
 using Vizinhanca.API.Services;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Vizinhanca.API.Controllers
 {
@@ -18,6 +20,8 @@ namespace Vizinhanca.API.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
+        [EnableRateLimiting("fixed")]        
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             var usuario = await _usuarioService.GetUsuarioByEmailAsync(loginDto.Email);
