@@ -61,6 +61,14 @@ namespace Vizinhanca.API.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<ActionResult<PedidoAjuda>> PostPedidoAjuda(PedidoAjudaCreateDto pedidoAjudaDto)
+        {
+            var novoPedidoAjuda = await _pedidoAjudaService.CreatePedidoAjudaAsync(pedidoAjudaDto);
+
+            return CreatedAtAction(nameof(GetPedidoAjuda), new { id = novoPedidoAjuda.Id }, novoPedidoAjuda);
+        }
+
         [HttpPost("{id}/concluir")]
         public async Task<IActionResult> ConcluirPedido(int id)
         {
