@@ -28,7 +28,7 @@ namespace Vizinhanca.API.Controllers
                 return Unauthorized();
             }
 
-            var usuarioTask = _context.Usuarios.FindAsync(userId).AsTask(); // <<-- CORREÇÃO 1
+            var usuarioTask = _context.Usuarios.FindAsync(userId).AsTask(); 
 
             var pedidosCriadosTask = _context.PedidosAjuda
                 .CountAsync(p => p.UsuarioId == userId);
@@ -36,7 +36,6 @@ namespace Vizinhanca.API.Controllers
             var ajudasOferecidasTask = _context.Participacoes
                 .CountAsync(p => p.UsuarioId == userId);
 
-            // Task.WhenAll agora funciona com os 3 Tasks
             await Task.WhenAll(usuarioTask, pedidosCriadosTask, ajudasOferecidasTask);
 
             var usuario = await usuarioTask;
@@ -56,8 +55,8 @@ namespace Vizinhanca.API.Controllers
 
             var ultimosComentarios = await _context.Comentarios
                 .Include(c => c.Usuario)
-                .Include(c => c.Pedido) // <<-- CORREÇÃO 3 (Exemplo, use seu nome real)
-                .Where(c => c.Pedido.UsuarioId == userId) // <<-- CORREÇÃO 3
+                .Include(c => c.Pedido) 
+                .Where(c => c.Pedido.UsuarioId == userId) 
                 .OrderByDescending(c => c.DataCriacao)
                 .Take(5)
                 .Select(c => new ComentarioResumoDto
@@ -66,7 +65,7 @@ namespace Vizinhanca.API.Controllers
                     Texto = c.Mensagem,
                     NomeUsuario = c.Usuario.Nome,
                     PedidoId = c.PedidoId,
-                    TituloPedido = c.Pedido.Titulo, // <<-- CORREÇÃO 3
+                    TituloPedido = c.Pedido.Titulo, 
                     DataCriacao = c.DataCriacao
                 })
                 .ToListAsync();
