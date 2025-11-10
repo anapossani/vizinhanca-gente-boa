@@ -44,10 +44,16 @@ public class WebApiApplication
         ?? throw new InvalidOperationException("A audiência do JWT (Jwt:Audience) não foi encontrada.");
 
     builder.Services.AddDbContext<VizinhancaContext>(options =>
-        options.UseNpgsql(connectionString)
+        options.UseNpgsql(connectionString, npgsqlOptionsAction: sqlOptions =>
+        {
+            // Habilita a resiliência de conexão
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5, // Tenta se reconectar até 5 vezes
+                maxRetryDelay: TimeSpan.FromSeconds(30), // Espera até 30s entre as tentativas
+                errorCodesToAdd: null);
+        })
         .UseSnakeCaseNamingConvention()
-
-        );
+);
 
         //builder.Services.AddRateLimiter(options =>
        // {
