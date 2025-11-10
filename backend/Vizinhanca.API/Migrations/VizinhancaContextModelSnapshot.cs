@@ -17,7 +17,7 @@ namespace Vizinhanca.API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -130,21 +130,9 @@ namespace Vizinhanca.API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Bairro")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("bairro");
-
                     b.Property<int>("CategoriaId")
                         .HasColumnType("integer")
                         .HasColumnName("categoria_id");
-
-                    b.Property<string>("Cidade")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("cidade");
 
                     b.Property<DateTime?>("DataConclusao")
                         .HasColumnType("timestamp with time zone")
@@ -157,12 +145,6 @@ namespace Vizinhanca.API.Migrations
                     b.Property<string>("Descricao")
                         .HasColumnType("text")
                         .HasColumnName("descricao");
-
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasMaxLength(2)
-                        .HasColumnType("character varying(2)")
-                        .HasColumnName("estado");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer")
