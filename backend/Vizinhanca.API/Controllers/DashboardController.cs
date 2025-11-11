@@ -16,7 +16,7 @@ namespace Vizinhanca.API.Controllers
 
         public DashboardController(VizinhancaContext context)
         {
-            _context = context;
+            _context = context;     
         }
 
         [HttpGet]
@@ -28,17 +28,17 @@ namespace Vizinhanca.API.Controllers
                 return Unauthorized();
             }
 
-            var usuarioTask = _context.Usuarios.FindAsync(userId).AsTask(); 
+            var usuario = await _context.Usuarios.FindAsync(userId);
+            if (usuario == null)
+            {
+                return NotFound("Usuário não encontrado.");
+            }
 
-            var pedidosCriadosTask = _context.PedidosAjuda
+            var pedidosCriados = await _context.PedidosAjuda
                 .CountAsync(p => p.UsuarioId == userId);
 
-            var ajudasOferecidasTask = _context.Participacoes
+            var ajudasOferecidas = await _context.Participacoes
                 .CountAsync(p => p.UsuarioId == userId);
-
-            await Task.WhenAll(usuarioTask, pedidosCriadosTask, ajudasOferecidasTask);
-
-            var usuario = await usuarioTask;
 
             var ultimosPedidos = await _context.PedidosAjuda
                 .Where(p => p.UsuarioId == userId)
@@ -48,36 +48,37 @@ namespace Vizinhanca.API.Controllers
                 {
                     Id = p.Id,
                     Titulo = p.Titulo,
-                    Status = p.Status.ToString(), // <<-- CORREÇÃO 2
+                    Status = p.Status.ToString(),
                     DataCriacao = p.DataCriacao
                 })
                 .ToListAsync();
 
             var ultimosComentarios = await _context.Comentarios
+                
                 .Include(c => c.Usuario)
-                .Include(c => c.Pedido) 
-                .Where(c => c.Pedido.UsuarioId == userId) 
+                .Include(c => c.Pedido)
+                .Where(c => c.Pedido.UsuarioId == userId)
                 .OrderByDescending(c => c.DataCriacao)
                 .Take(5)
                 .Select(c => new ComentarioResumoDto
                 {
                     Id = c.Id,
-                    Texto = c.Mensagem,
+                    Texto = c.Mensagem, 
                     NomeUsuario = c.Usuario.Nome,
                     PedidoId = c.PedidoId,
-                    TituloPedido = c.Pedido.Titulo, 
+                    TituloPedido = c.Pedido.Titulo,
                     DataCriacao = c.DataCriacao
                 })
                 .ToListAsync();
 
             var dashboardData = new DashboardDto
             {
-                NomeUsuario = usuario?.Nome ?? "Usuário",
+                NomeUsuario = usuario.Nome,
                 Stats = new DashboardStatsDto
                 {
-                    PedidosCriados = await pedidosCriadosTask,
-                    AjudasOferecidas = await ajudasOferecidasTask,
-                    ConexoesFeitas = 0
+                    PedidosCriados = pedidosCriados,
+                    AjudasOferecidas = ajudasOferecidas,
+                    ConexoesFeitas = 0 
                 },
                 UltimosPedidos = ultimosPedidos,
                 UltimosComentarios = ultimosComentarios

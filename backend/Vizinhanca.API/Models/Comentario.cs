@@ -13,4 +13,5 @@ namespace Vizinhanca.API.Models
         public PedidoAjuda Pedido { get; set; } = null!;
         public Usuario Usuario { get; set; } = null!;
     }
+
 }
