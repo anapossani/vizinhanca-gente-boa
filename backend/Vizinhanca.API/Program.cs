@@ -105,12 +105,13 @@ public class WebApiApplication
 
     var app = builder.Build();
     
+    app.UseCors(MyAllowSpecificOrigins); 
     app.UseSwagger();
     app.UseSwaggerUI();
     app.UseHttpsRedirection();
     //app.UseRateLimiter();
     app.UseRouting();
-    app.UseCors(MyAllowSpecificOrigins); 
+    
     app.UseAuthorization();
     app.MapControllers();
     app.Run();
