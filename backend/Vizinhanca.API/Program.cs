@@ -29,6 +29,7 @@ public class WebApiApplication
     builder.Services.AddScoped<PedidoAjudaService>();
     builder.Services.AddScoped<TokenService>();
     builder.Services.AddScoped<IdentityService>();
+    builder.Services.AddScoped<DashboardService>();
 
 
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")

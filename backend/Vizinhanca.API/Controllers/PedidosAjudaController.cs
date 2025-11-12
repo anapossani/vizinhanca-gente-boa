@@ -3,6 +3,7 @@ using Vizinhanca.API.Exceptions;
 using Vizinhanca.API.Models;
 using Vizinhanca.API.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Vizinhanca.API.Controllers
 {
@@ -19,13 +20,29 @@ namespace Vizinhanca.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PedidoAjuda>>> GetPedidosAjuda(
+        public async Task<ActionResult<IEnumerable<PedidoAjudaDto>>> GetPedidos(
             [FromQuery] int? usuarioId,
             [FromQuery] StatusPedido? status,
             [FromQuery] DateTime? dataInicial,
-            [FromQuery] DateTime? dataFinal)
+            [FromQuery] DateTime? dataFinal,
+            [FromQuery] bool apenasDeOutrosUsuarios = false) 
+
         {
-            var pedidosAjuda = await _pedidoAjudaService.GetPedidosAjudaAsync(usuarioId, status, dataInicial, dataFinal);
+            int? usuarioLogadoId = null;
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(userIdString, out var userId))
+               {
+                  usuarioLogadoId = userId;
+               }
+
+            var pedidosAjuda = await _pedidoAjudaService.GetPedidosAjudaAsync(
+                usuarioId,
+                status,
+                dataInicial,
+                dataFinal,
+                apenasDeOutrosUsuarios,
+                usuarioLogadoId
+            );
             return Ok(pedidosAjuda);
         }
 

@@ -15,32 +15,58 @@ namespace Vizinhanca.API.Services
             _context = context;
             _identityService = identityService;
         }
-        public async Task<IEnumerable<PedidoAjuda>> GetPedidosAjudaAsync(int? usuarioId, StatusPedido? status, DateTime? dataInicial, DateTime? dataFinal)
-
+        public async Task<IEnumerable<PedidoAjudaDto>> GetPedidosAjudaAsync(
+        int? usuarioId, 
+        StatusPedido? status, 
+        DateTime? dataInicial,
+        DateTime? dataFinal,
+        bool apenasDeOutrosUsuarios = false, 
+        int? usuarioLogadoId = null) 
         {
-            var query = _context.PedidosAjuda.AsQueryable();
+        var query = _context.PedidosAjuda
+            .Include(p => p.Usuario)
+            .Include(p => p.Categoria)
+            .AsQueryable(); 
 
-            if (usuarioId.HasValue)
-            {
-                query = query.Where(c => c.UsuarioId == usuarioId.Value);
-            }
-
-            if (status.HasValue)
-            {
-                query = query.Where(c => c.Status == status.Value);
-            }
-
-            if (dataInicial.HasValue)
-            {
-                var dataIni = dataInicial.Value.Date;
-                var dataFim = (dataFinal ?? dataInicial).Value.Date.AddDays(1);
-
-                query = query.Where(p => p.DataCriacao >= dataIni && p.DataCriacao < dataFim);
-            }
-
-            return await query.ToListAsync();
+        if (usuarioId.HasValue)
+        {
+            query = query.Where(p => p.UsuarioId == usuarioId.Value);
         }
 
+        if (status.HasValue)
+        {
+            query = query.Where(p => p.Status == status.Value);
+        }
+
+        if (dataInicial.HasValue)
+        {
+            query = query.Where(p => p.DataCriacao >= dataInicial.Value);
+        }
+
+        if (dataFinal.HasValue)
+        {
+            query = query.Where(p => p.DataCriacao <= dataFinal.Value);
+        }
+
+        if (apenasDeOutrosUsuarios && usuarioLogadoId.HasValue)
+        {
+            query = query.Where(p => p.UsuarioId != usuarioLogadoId.Value);
+        }
+
+        var pedidos = await query
+            .OrderByDescending(p => p.DataCriacao)
+            .Select(p => new PedidoAjudaDto
+            {
+                Id = p.Id,
+                Titulo = p.Titulo,
+                NomeUsuario = p.Usuario.Nome,
+                NomeCategoria = p.Categoria.Nome
+            })
+            .ToListAsync();
+             return pedidos;
+        }
+        
+        
         public async Task<PedidoAjuda?> GetPedidoAjudaByIdAsync(int id)
         {
             return await _context.PedidosAjuda.FindAsync(id);
@@ -114,7 +140,7 @@ namespace Vizinhanca.API.Services
             pedido.DataConclusao = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return true;
-        }                
+        }     
 
     }
 }       
