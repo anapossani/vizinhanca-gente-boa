@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 
 public partial class Program { }
 
@@ -47,27 +48,26 @@ public class WebApiApplication
     builder.Services.AddDbContext<VizinhancaContext>(options =>
         options.UseNpgsql(connectionString, npgsqlOptionsAction: sqlOptions =>
         {
-            // Habilita a resiliência de conexão
             sqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 5, // Tenta se reconectar até 5 vezes
-                maxRetryDelay: TimeSpan.FromSeconds(30), // Espera até 30s entre as tentativas
+                maxRetryCount: 5, 
+                maxRetryDelay: TimeSpan.FromSeconds(30),
                 errorCodesToAdd: null);
         })
         .UseSnakeCaseNamingConvention()
 );
 
-        //builder.Services.AddRateLimiter(options =>
-       // {
-       //     options.AddFixedWindowLimiter(policyName: "fixed", opt =>
-       //     {
-       //         opt.PermitLimit = 5; 
-       //         opt.Window = TimeSpan.FromSeconds(60); 
-       //         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst; 
-       //         opt.QueueLimit = 2; 
-       //     });
-//
- //           options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
- //       });        
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.AddFixedWindowLimiter(policyName: "fixed", opt =>
+            {
+                opt.PermitLimit = 10; 
+                opt.Window = TimeSpan.FromSeconds(10); 
+                opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst; 
+                opt.QueueLimit = 2; 
+            });
+
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        });        
 
     builder.Services.AddAuthentication(options =>
     {
@@ -110,7 +110,7 @@ public class WebApiApplication
     app.UseSwagger();
     app.UseSwaggerUI();
     app.UseHttpsRedirection();
-    //app.UseRateLimiter();
+    app.UseRateLimiter();
     app.UseRouting();
     
     app.UseAuthorization();

@@ -4,6 +4,7 @@ using Vizinhanca.API.Models;
 using Vizinhanca.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Vizinhanca.API.DTOs;
 
 namespace Vizinhanca.API.Controllers
 {
@@ -47,7 +48,7 @@ namespace Vizinhanca.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<PedidoAjuda>> GetPedidoAjuda(int id)
+        public async Task<ActionResult<PedidoAjudaDetalhesDto>> GetPedidoAjuda(int id)
         {
             var pedidoAjuda = await _pedidoAjudaService.GetPedidoAjudaByIdAsync(id);
 

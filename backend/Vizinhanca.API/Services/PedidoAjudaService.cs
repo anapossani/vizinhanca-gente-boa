@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Vizinhanca.API.Data;
 using Vizinhanca.API.Models;
+using Vizinhanca.API.DTOs;
 using Vizinhanca.API.Exceptions;
 
 namespace Vizinhanca.API.Services
@@ -59,18 +60,50 @@ namespace Vizinhanca.API.Services
             {
                 Id = p.Id,
                 Titulo = p.Titulo,
-                NomeUsuario = p.Usuario.Nome,
-                NomeCategoria = p.Categoria.Nome
+                UsuarioNome = p.Usuario.Nome,                
+                CategoriaNome = p.Categoria.Nome,
             })
             .ToListAsync();
              return pedidos;
         }
         
-        
-        public async Task<PedidoAjuda?> GetPedidoAjudaByIdAsync(int id)
+        public async Task<PedidoAjudaDetalhesDto?> GetPedidoAjudaByIdAsync(int id)
         {
-            return await _context.PedidosAjuda.FindAsync(id);
-        }
+            var pedidoDto = await _context.PedidosAjuda
+                .Include(p => p.Usuario)
+                .Include(p => p.Categoria)
+                .Include(p => p.Comentarios)
+                    .ThenInclude(c => c.Usuario)
+                
+                .Where(p => p.Id == id) 
+                .Select(p => new PedidoAjudaDetalhesDto 
+                {
+                    Id = p.Id,
+                    Titulo = p.Titulo,
+                    Descricao = p.Descricao,
+                    Status = p.Status.ToString(),
+                    DataCriacao = p.DataCriacao,
+                    UsuarioId = p.UsuarioId,
+                    UsuarioNome = p.Usuario.Nome,
+
+                    CategoriaId = p.CategoriaId,
+                    CategoriaNome = p.Categoria.Nome,
+                    
+                    Comentarios = p.Comentarios.Select(c => new ComentarioDto
+                    {
+                        Id = c.Id,
+                        Mensagem = c.Mensagem,
+                        DataCriacao = c.DataCriacao,
+                        UsuarioId = c.UsuarioId,
+                        UsuarioNome = c.Usuario.Nome 
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync(); 
+
+            return pedidoDto;
+        }        
+
+
 
         public async Task<PedidoAjuda> CreatePedidoAjudaAsync(PedidoAjudaCreateDto pedidoAjudaDto)
         {

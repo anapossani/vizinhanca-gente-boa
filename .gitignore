@@ -52,3 +52,8 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+/backend/.vs/Vizinhanca/CopilotIndices
+/backend/.vs/Vizinhanca/v17
+/backend/.vs/Vizinhanca/FileContentIndex
+backend/.vs/Vizinhanca/config/applicationhost.config
+backend/.vs/Vizinhanca/DesignTimeBuild/.dtbcache.v2
