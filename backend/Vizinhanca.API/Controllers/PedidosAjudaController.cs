@@ -13,11 +13,15 @@ namespace Vizinhanca.API.Controllers
     [Authorize] 
     public class PedidosAjudaController : BaseApiController
     {
+        private readonly IdentityService _identityService;
         private readonly PedidoAjudaService _pedidoAjudaService;
 
-        public PedidosAjudaController(PedidoAjudaService pedidoAjudaService)
+
+        public PedidosAjudaController(PedidoAjudaService pedidoAjudaService, IdentityService identityService
+            )
         {
             _pedidoAjudaService = pedidoAjudaService;
+            _identityService = identityService;
         }
 
         [HttpGet]
@@ -26,7 +30,8 @@ namespace Vizinhanca.API.Controllers
             [FromQuery] StatusPedido? status,
             [FromQuery] DateTime? dataInicial,
             [FromQuery] DateTime? dataFinal,
-            [FromQuery] bool apenasDeOutrosUsuarios = false) 
+            [FromQuery] bool apenasDeOutrosUsuarios = false,
+            [FromQuery] bool? apenasPedidosComParticipacao = null)
 
         {
             int? usuarioLogadoId = null;
@@ -87,17 +92,57 @@ namespace Vizinhanca.API.Controllers
             return CreatedAtAction(nameof(GetPedidoAjuda), new { id = novoPedidoAjuda.Id }, novoPedidoAjuda);
         }
 
-        [HttpPost("{id}/concluir")]
-        public async Task<IActionResult> ConcluirPedido(int id)
+        [HttpPost("{id}/cancelar")]
+        [Authorize]
+        public async Task<IActionResult> CancelarPedido(int id)
         {
-            var sucesso = await _pedidoAjudaService.ConcluirPedidoAsync(id);
-
-            if (!sucesso)
+            try
             {
-                return NotFound();
-            }
+                var userId = _identityService.GetUserId(); 
+                if (userId == 0) return Unauthorized();
 
-            return NoContent();
+                await _pedidoAjudaService.CancelarPedidoAsync(id, userId);
+
+                return NoContent(); 
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message); 
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);             }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message); 
+            }
+        }
+
+        [HttpPost("{id}/concluir")]
+        [Authorize]
+        public async Task<IActionResult> ConcluirPedido(int id, [FromBody] PedidoAjudaConclusaoDto dto)
+        {
+            try
+            {
+                var userId = _identityService.GetUserId();
+                if (userId == 0) return Unauthorized();
+
+                await _pedidoAjudaService.ConcluirPedidoAsync(id, userId, dto);
+
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
     }

@@ -1,7 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Vizinhanca.API.Exceptions;
 using Vizinhanca.API.Models;
 using Vizinhanca.API.Services;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Vizinhanca.API.Controllers
 {
@@ -56,6 +57,24 @@ namespace Vizinhanca.API.Controllers
                 return NotFound();
             }
             return NoContent();
+        }
+
+        [HttpPost("{id}/aceitar")]
+        public async Task<IActionResult> AceitarParticipacao(int id)
+        {
+            try
+            {
+                var sucesso = await _participacaoService.AceitarParticipacaoAsync(id, UsuarioLogadoId);
+                if (!sucesso)
+                {
+                    return BadRequest("Não foi possível aceitar a participação.");
+                }
+                return NoContent();
+            }
+            catch (BusinessRuleException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }    
 }

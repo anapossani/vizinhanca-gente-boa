@@ -22,19 +22,7 @@ namespace Vizinhanca.API.Services
             var pedidosCriados = await _context.PedidosAjuda.CountAsync(p => p.UsuarioId == userId);
             var ajudasOferecidas = await _context.Participacoes.CountAsync(p => p.UsuarioId == userId);
 
-            var ultimosPedidos = await _context.PedidosAjuda
-                .Where(p => p.UsuarioId == userId)
-                .OrderByDescending(p => p.DataCriacao)
-                .Take(3)
-                .Select(p => new PedidoAjudaResumoDto { /* ... */ })
-                .ToListAsync();
-
-            var ultimosComentarios = await _context.Comentarios
-                .Where(c => c.Pedido.UsuarioId == userId)
-                .OrderByDescending(c => c.DataCriacao)
-                .Take(5)
-                .Select(c => new ComentarioResumoDto { /* ... */ })
-                .ToListAsync();
+      
 
             var dashboardData = new DashboardDto
             {
@@ -44,9 +32,7 @@ namespace Vizinhanca.API.Services
                     PedidosCriados = pedidosCriados,
                     AjudasOferecidas = ajudasOferecidas,
                     ConexoesFeitas = 0
-                },
-                UltimosPedidos = ultimosPedidos,
-                UltimosComentarios = ultimosComentarios
+                }
             };
 
             return dashboardData;

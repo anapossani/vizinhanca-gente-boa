@@ -67,7 +67,47 @@ namespace Vizinhanca.API.Services
 
             await _context.SaveChangesAsync();
             return true;
-        }        
+        }
+
+
+
+        public async Task<bool> AceitarParticipacaoAsync(int participacaoId, int usuarioLogadoId)
+        {
+            var participacaoAlvo = await _context.Participacoes
+                                                .Include(p => p.Pedido)
+                                                .FirstOrDefaultAsync(p => p.Id == participacaoId);
+
+            if (participacaoAlvo == null)
+            {
+                return false; 
+            }
+
+            if (participacaoAlvo.Pedido.UsuarioId != usuarioLogadoId)
+            {
+                throw new BusinessRuleException("Apenas o dono do pedido pode aceitar participantes.");
+            }
+
+            if (participacaoAlvo.Pedido.Status != StatusPedido.Aberto)
+            {
+                throw new BusinessRuleException("Este pedido não está mais aberto para aceitar participantes.");
+            }
+
+            participacaoAlvo.Status = StatusParticipacao.aceito;
+            participacaoAlvo.Pedido.Status = StatusPedido.EmAndamento;
+
+           var outrasParticipacoes = await _context.Participacoes
+                .Where(p => p.PedidoId == participacaoAlvo.PedidoId && p.Id != participacaoId)
+                .ToListAsync();
+
+            foreach (var outra in outrasParticipacoes)
+            {
+                outra.Status = StatusParticipacao.recusado;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
 
     }
 }

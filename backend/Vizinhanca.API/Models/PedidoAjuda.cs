@@ -5,10 +5,10 @@ namespace Vizinhanca.API.Models
 {
     public enum StatusPedido
     {
-        aberto,
-        em_andamento,
-        concluido,
-        cancelado
+        Aberto = 0,
+        EmAndamento = 1,
+        Concluido = 2,
+        Cancelado = 3
     }
 
     [Table("pedido_ajuda")]

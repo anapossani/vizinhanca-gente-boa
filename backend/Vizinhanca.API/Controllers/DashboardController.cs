@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Vizinhanca.API.Data;
 using Vizinhanca.API.DTOs;
-using Vizinhanca.API.Services;
 
 namespace Vizinhanca.API.Controllers
 {
@@ -11,11 +12,11 @@ namespace Vizinhanca.API.Controllers
     [Authorize]
     public class DashboardController : ControllerBase
     {
-        private readonly DashboardService _dashboardService; 
+        private readonly VizinhancaContext _context;
 
-        public DashboardController(DashboardService dashboardService)
+        public DashboardController(VizinhancaContext context)
         {
-            _dashboardService = dashboardService;
+            _context = context;
         }
 
         [HttpGet]
@@ -26,15 +27,44 @@ namespace Vizinhanca.API.Controllers
             {
                 return Unauthorized();
             }
+            var usuario = await _context.Usuarios.FindAsync(userId);
+            if (usuario == null) return NotFound("Usuário não encontrado.");
 
-            var dashboardData = await _dashboardService.GetDashboardDataAsync(userId);
+            var pedidosCriados = await _context.PedidosAjuda
+                .CountAsync(p => p.UsuarioId == userId);
 
-            if (dashboardData == null)
+            var ajudasOferecidas = await _context.Participacoes
+                .CountAsync(p => p.UsuarioId == userId);
+
+            var ultimosPedidos = await _context.PedidosAjuda
+                .Where(p => p.UsuarioId == userId)
+                .OrderByDescending(p => p.DataCriacao)
+                .Take(5)
+                .Select(p => new PedidoAjudaResumoDto
+                {
+                    Id = p.Id,
+                    Titulo = p.Titulo,
+                    Status = p.Status.ToString(),
+                    DataCriacao = p.DataCriacao,
+                    ContagemComentarios = p.Comentarios.Count(),
+                    ContagemParticipacoes = p.Participacoes.Count()
+                })
+                .ToListAsync();
+
+            var dashboardData = new DashboardDto
             {
-                return NotFound("Usuário não encontrado.");
-            }
+                NomeUsuario = usuario.Nome,
+                Stats = new DashboardStatsDto
+                {
+                    PedidosCriados = pedidosCriados,
+                    AjudasOferecidas = ajudasOferecidas,
+                    ConexoesFeitas = 0
+                },
+                UltimosPedidos = ultimosPedidos
+            };
 
             return Ok(dashboardData);
         }
+
     }
 }

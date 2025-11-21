@@ -1,8 +1,9 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Vizinhanca.API.Data;
-using Vizinhanca.API.Models;
 using Vizinhanca.API.DTOs;
 using Vizinhanca.API.Exceptions;
+using Vizinhanca.API.Models;
 
 namespace Vizinhanca.API.Services
 {
@@ -22,7 +23,8 @@ namespace Vizinhanca.API.Services
         DateTime? dataInicial,
         DateTime? dataFinal,
         bool apenasDeOutrosUsuarios = false, 
-        int? usuarioLogadoId = null) 
+        int? usuarioLogadoId = null,
+        bool apenasComParticipacao = false )
         {
         var query = _context.PedidosAjuda
             .Include(p => p.Usuario)
@@ -54,14 +56,32 @@ namespace Vizinhanca.API.Services
             query = query.Where(p => p.UsuarioId != usuarioLogadoId.Value);
         }
 
+        if (apenasComParticipacao)
+            {
+                query = query.Where(p => p.Participacoes.Any(part => part.Status == StatusParticipacao.interessado));
+
+            }
+
+
         var pedidos = await query
             .OrderByDescending(p => p.DataCriacao)
+            .Include(p => p.Comentarios)
+            .Include(p => p.Participacoes)
+                .ThenInclude(part=> part.Usuario)
             .Select(p => new PedidoAjudaDto
             {
                 Id = p.Id,
                 Titulo = p.Titulo,
                 UsuarioNome = p.Usuario.Nome,                
                 CategoriaNome = p.Categoria.Nome,
+                TotalComentarios = p.Comentarios.Count(),
+                TotalParticipacoes = p.Participacoes.Count(),
+                Participacoes = p.Participacoes.Select( a => new ParticipacaoDetalhesDto
+                {
+                    Id = a.Id,
+                    DataParticipacao = a.DataParticipacao,
+                    UsuarioNome = a.Usuario.Nome
+                } ).ToList(),
             })
             .ToListAsync();
              return pedidos;
@@ -81,14 +101,12 @@ namespace Vizinhanca.API.Services
                     Id = p.Id,
                     Titulo = p.Titulo,
                     Descricao = p.Descricao,
-                    Status = p.Status.ToString(),
+                    Status = (int)p.Status,
                     DataCriacao = p.DataCriacao,
                     UsuarioId = p.UsuarioId,
                     UsuarioNome = p.Usuario.Nome,
-
                     CategoriaId = p.CategoriaId,
-                    CategoriaNome = p.Categoria.Nome,
-                    
+                    CategoriaNome = p.Categoria.Nome,                    
                     Comentarios = p.Comentarios.Select(c => new ComentarioDto
                     {
                         Id = c.Id,
@@ -114,7 +132,7 @@ namespace Vizinhanca.API.Services
                 Descricao = pedidoAjudaDto.Descricao,
                 CategoriaId = pedidoAjudaDto.CategoriaId,
                 DataCriacao = DateTime.UtcNow,
-                Status = StatusPedido.aberto,
+                Status = pedidoAjudaDto.Status,
                 UsuarioId = usuarioLogadoId
             };
             _context.PedidosAjuda.Add(novoPedidoAjuda);
@@ -136,11 +154,11 @@ namespace Vizinhanca.API.Services
                 throw new BusinessRuleException("Somente o criador do pedido pode realizar alterações.");
             }
 
-            if (pedidoAjudaDto.Status == StatusPedido.concluido)
+            if (pedidoAjudaDto.Status == StatusPedido.Concluido)
             {
                 throw new BusinessRuleException("A conclusão de um pedido deve ser feita através do endpoint específico '/concluir'.");
             }
-            if (pedidoExistente.Status == StatusPedido.concluido || pedidoExistente.Status == StatusPedido.cancelado ) 
+            if (pedidoExistente.Status == StatusPedido.Concluido || pedidoExistente.Status == StatusPedido.Cancelado ) 
             {
                 throw new BusinessRuleException($"Não é possível alterar um pedido com status {pedidoExistente.Status} ");
             }
@@ -153,27 +171,68 @@ namespace Vizinhanca.API.Services
             return true;
         }
 
-        public async Task<bool> ConcluirPedidoAsync(int id)
+        public async Task<bool> ConcluirPedidoAsync(int pedidoId, int usuarioLogadoId, [FromBody] PedidoAjudaConclusaoDto dto)
         {
-            var pedido = await _context.PedidosAjuda.FindAsync(id);
-            var usuarioLogadoId = _identityService.GetUserId();
-            
-            if (pedido is null || pedido.Status != StatusPedido.em_andamento)
-            {
-                return false;
-            }            
+            var pedido = await _context.PedidosAjuda.FindAsync(pedidoId);
 
-            if (usuarioLogadoId != pedido.UsuarioId)
+            if (pedido == null)
             {
-                throw new BusinessRuleException("A conclusão de um pedido deve ser pelo dono do pedido.'.");
-
+                throw new KeyNotFoundException($"Pedido com ID {pedidoId} não encontrado.");
             }
 
-            pedido.Status = StatusPedido.concluido;
+            if (pedido.UsuarioId != usuarioLogadoId)
+            {
+                throw new UnauthorizedAccessException("Usuário não autorizado a cancelar este pedido.");
+            }
+
+            if (pedido.Status == StatusPedido.Concluido || pedido.Status == StatusPedido.Cancelado)
+            {
+                throw new InvalidOperationException($"Não é possível cancelar um pedido com status '{pedido.Status}'.");
+            }
+
+            pedido.Status = StatusPedido.Concluido;
             pedido.DataConclusao = DateTime.UtcNow;
+
+            if (!string.IsNullOrWhiteSpace(dto.Comentario))
+            {
+                var novoComentario = new Comentario
+                {
+                    Mensagem = dto.Comentario,
+                    PedidoId = pedidoId,
+                    UsuarioId = usuarioLogadoId,
+                    DataCriacao = DateTime.UtcNow
+                };
+                _context.Comentarios.Add(novoComentario);
+            }
+
             await _context.SaveChangesAsync();
             return true;
-        }     
+        }
 
+        public async Task CancelarPedidoAsync(int pedidoId, int usuarioLogadoId)
+        {
+            var pedido = await _context.PedidosAjuda.FindAsync(pedidoId);
+
+            if (pedido == null)
+            {
+                throw new KeyNotFoundException($"Pedido com ID {pedidoId} não encontrado.");
+            }
+
+            if (pedido.UsuarioId != usuarioLogadoId)
+            {
+                throw new UnauthorizedAccessException("Usuário não autorizado a cancelar este pedido.");
+            }
+
+            if (pedido.Status == StatusPedido.Concluido || pedido.Status == StatusPedido.Cancelado)
+            {
+                throw new InvalidOperationException($"Não é possível cancelar um pedido com status '{pedido.Status}'.");
+            }
+
+            pedido.Status = StatusPedido.Cancelado;               ;
+            pedido.DataConclusao = DateTime.UtcNow; 
+
+            await _context.SaveChangesAsync();
+        }
+    
     }
 }       
